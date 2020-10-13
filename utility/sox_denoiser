@@ -16,13 +16,14 @@ Options:
     -e, --noise-end=<time>      Ending point for noise profile selection; in seconds [default: 5]
     -p, --play                  Plays output instead of saving to file
     --noise-reduction=<float>   Reduce noise by a percentage amount; ex. 0.2 or 20% [default: .2]
-    --verbose=<level>           Verbosity, the more v's the more verbose; ex. --verbose=v [default: vvvv]
-    --overwrite                 Overwrite existing processed files when redoing denoiser on same file
+    --verbose=<level>           Verbosity, the more v's the more verbose;
+                                    ex. --verbose=v [default: vvvv]
+    --overwrite                 Overwrite existing processed files when redoing denoiser on
+                                    same file
 """
 # Omitted for now
 # Commands:
-    # scan <dir_path>             Scans a directory <dir_path> for files with extension <ext> to denoise
-
+# scan <dir_path>             Scans a directory <dir_path> for files with extension <ext> to denoise
 
 # Useful imports
 import os
@@ -50,7 +51,6 @@ lg = logging.getLogger(__name__)
 def init(args):
     log_format = '%(asctime)s %(message)s'
     log_level = get_level(args["--verbose"])
-    
     logging.basicConfig(level=log_level, format=log_format)
 
 # Main functionality
@@ -73,12 +73,13 @@ def run(args):
             path_list = list(filter(lambda e: not re_prog.search(e), path_list))
     
         # default, remove already processed files with "_processed" signature
-        path_list = list(filter(lambda e: not re.search(f".*_processed\.{ext}", e), path_list))
+        path_list = list(filter(lambda e: not re.search(r".*_processed\.{ext}", e), path_list))
         
         # check if paths are being filtered correctly
         debug(path_list)
     else:
-        # process audio files using a list of file paths given, does not do filter checks
+        # process audio files using a list of file paths given,
+        # does not do filter checks
         path_list = args["<file_path>"]
 
     # process audio files
@@ -86,7 +87,8 @@ def run(args):
         process_audio_file(args, p)
 
 def process_audio_file(args, file_path):
-    path_wo_ext, ext = pt.splitext(file_path) # extension include the dot
+    # extension include the dot
+    path_wo_ext, ext = pt.splitext(file_path)
     # create new file path
     new_audio_path = f"{path_wo_ext}_processed{ext}"
 
@@ -111,12 +113,13 @@ def process_audio_file(args, file_path):
         # create noise profile for file
         c_proc = rc(f"sox {np_audio_path} -n noiseprof {np_profile_path}")
         # apply noise profile
-        c_proc = rc(f"sox {file_path} {temp_audio_path} noisered {np_profile_path} {noise_reduction_amount}")
+        c_proc = rc(
+            f"sox {file_path} {temp_audio_path} noisered {np_profile_path} {noise_reduction_amount}"
+        )
         # normalize audio
         c_proc = rc(f"sox --norm=-0.1 {temp_audio_path} {new_audio_path}")
 
     return True
-
 
 def rc(command):
     """Uses subprocess.run with shlex.split to run terminal commands"""
@@ -127,6 +130,7 @@ def rc(command):
         critical(f"Failed to run command \"{command}\", returned error code: {proc.returncode}")
     else:
         return proc
+
 
 def get_level(verbose_level):
     """Calculates a value between 0 and 50 based on how many v's or any character is provided"""
@@ -140,9 +144,13 @@ def get_level(verbose_level):
     else:
         return v_num
 
+
 def main(args):
+    print(args)
+    exit()
     init(args)
     run(args)
+
 
 if __name__ == "__main__":
     args = docopt(__doc__)
